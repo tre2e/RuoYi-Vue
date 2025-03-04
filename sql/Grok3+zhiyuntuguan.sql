@@ -86,3 +86,46 @@ CREATE TABLE lib_comment (
     PRIMARY KEY (id),
     FOREIGN KEY (user_id) REFERENCES sys_user(user_id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB COMMENT='留言表';
+
+
+
+
+-- 插入类别数据
+INSERT INTO book_category (name, create_by, remark) VALUES
+('小说', 'admin', '文学类小说'),
+('科技', 'admin', '科学技术相关书籍'),
+('历史', 'admin', '历史相关书籍'),
+('儿童', 'admin', '适合儿童阅读的书籍'),
+('艺术', 'admin', '艺术与设计类书籍');
+
+-- 插入区域数据
+INSERT INTO book_region (name, create_by, remark) VALUES
+('A区', 'admin', '一楼东侧'),
+('B区', 'admin', '一楼西侧'),
+('C区', 'admin', '二楼东侧'),
+('D区', 'admin', '二楼西侧'),
+('E区', 'admin', '三楼阅览室');
+
+-- 插入书籍数据
+INSERT INTO mng_book (name, cover, author, publisher, isbn, publish_date, category_id, region_id, quantity, status, entry_date, create_by, remark) VALUES
+('活着', 'cover1.jpg', '余华', '作家出版社', '9787506365437', '1993-06-01', 1, 1, 5, 1, '2023-01-10', 'admin', '经典文学作品'),
+('Python编程', 'cover2.jpg', 'Eric Matthes', '人民邮电出版社', '9787115479983', '2016-11-01', 2, 2, 3, 1, '2023-02-15', 'admin', '编程入门书籍'),
+('史记', 'cover3.jpg', '司马迁', '中华书局', '9787101003048', '1959-10-01', 3, 3, 2, 1, '2023-03-20', 'admin', '中国历史经典'),
+('哈利波特', 'cover4.jpg', 'J.K.罗琳', '人民文学出版社', '9787020137893', '2000-10-01', 4, 4, 10, 1, '2023-04-01', 'admin', '儿童奇幻小说'),
+('素描基础', 'cover5.jpg', '张三', '美术出版社', '9787532298761', '2018-05-01', 5, 5, 4, 1, '2023-05-10', 'admin', '艺术入门教材');
+
+-- 假设 sys_user 表已存在，插入借阅数据
+INSERT INTO book_issue (user_id, book_id, issue_date, due_date, return_date, status, create_by, remark) VALUES
+(1, 1, '2025-02-01 10:00:00', '2025-03-01 23:59:59', NULL, 0, 'admin', '用户借阅小说'),
+(2, 2, '2025-02-05 14:30:00', '2025-03-05 23:59:59', '2025-02-20 09:00:00', 1, 'admin', '用户归还编程书'),
+(3, 3, '2025-02-10 09:15:00', '2025-03-10 23:59:59', NULL, 0, 'admin', '历史爱好者借阅'),
+(1, 4, '2025-02-15 16:00:00', '2025-03-15 23:59:59', NULL, 0, 'admin', '儿童书籍借阅'),
+(4, 5, '2025-02-20 13:45:00', '2025-03-20 23:59:59', '2025-03-01 10:00:00', 1, 'admin', '艺术书籍已归还');
+
+-- 插入留言数据
+INSERT INTO lib_comment (user_id, content, comment_time, reply_content, reply_time, reply_by, create_by, remark) VALUES
+(1, '这本书真的很棒，推荐大家读！', '2025-02-01 12:00:00', '感谢推荐，我们会考虑增加库存。', '2025-02-02 09:00:00', 'librarian', 'admin', '关于《活着》'),
+(2, '借阅流程可以再优化一下吗？', '2025-02-05 15:30:00', '我们会尽快改进，感谢建议！', '2025-02-06 10:00:00', 'librarian', 'admin', '用户反馈'),
+(3, '历史类书籍太少了，能多进一些吗？', '2025-02-10 10:00:00', NULL, NULL, NULL, 'admin', '书籍种类建议'),
+(4, '图书馆环境很好，谢谢工作人员！', '2025-02-15 09:45:00', '感谢支持，我们会继续努力。', '2025-02-16 11:00:00', 'librarian', 'admin', '用户表扬'),
+(1, '《哈利波特》还有库存吗？', '2025-02-20 14:00:00', '目前还有5本可借。', '2025-02-21 08:30:00', 'librarian', 'admin', '库存询问');
