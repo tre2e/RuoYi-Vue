@@ -66,7 +66,36 @@ public class Book extends BaseEntity
     @Excel(name = "入馆时间", width = 30, dateFormat = "yyyy-MM-dd")
     private Date entryDate;
 
-    public void setId(Long id) 
+    /** 新增字段为了显示类别、区域、状态内容**/
+    private String categoryName; // 类别名称
+    private String regionName;   // 区域名称
+    private String statusName;   // 状态名称
+
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
+    }
+
+    public String getRegionName() {
+        return regionName;
+    }
+
+    public void setRegionName(String regionName) {
+        this.regionName = regionName;
+    }
+
+    public String getStatusName() {
+        return statusName;
+    }
+
+    public void setStatusName(String statusName) {
+        this.statusName = statusName;
+    }
+
+    public void setId(Long id)
     {
         this.id = id;
     }

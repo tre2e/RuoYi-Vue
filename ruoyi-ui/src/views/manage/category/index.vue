@@ -63,7 +63,7 @@
 
     <el-table v-loading="loading" :data="categoryList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="类别ID" align="center" prop="id" />
+      <el-table-column label="序号" align="center" prop="id" />
       <el-table-column label="类别名称" align="center" prop="name" />
       <el-table-column label="备注" align="center" prop="remark" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
@@ -85,7 +85,7 @@
         </template>
       </el-table-column>
     </el-table>
-    
+
     <pagination
       v-show="total>0"
       :total="total"

@@ -23,11 +23,24 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="remark"    column="remark"    />
     </resultMap>
 
-    <sql id="selectBookVo">
+    <!--<sql id="selectBookVo">
         select id, name, cover, author, publisher, isbn, publish_date, category_id, region_id, quantity, status, entry_date, create_time, update_time, create_by, remark from mng_book
+    </sql>-->
+
+    <sql id="selectBookVo">
+        SELECT
+            b.id, b.name, b.cover, b.author, b.publisher, b.isbn,
+            b.publish_date, b.category_id, b.region_id, b.quantity,
+            b.status, b.entry_date, b.create_time, b.update_time,
+            b.create_by, b.remark,
+            c.name AS categoryName,
+            r.name AS regionName
+        FROM mng_book b
+                 LEFT JOIN book_category c ON b.category_id = c.id
+                 LEFT JOIN book_region r ON b.region_id = r.id
     </sql>
 
-    <select id="selectBookList" parameterType="Book" resultMap="BookResult">
+    <!--<select id="selectBookList" parameterType="Book" resultMap="BookResult">
         <include refid="selectBookVo"/>
         <where>  
             <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
@@ -42,11 +55,28 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="status != null "> and status = #{status}</if>
             <if test="entryDate != null "> and entry_date = #{entryDate}</if>
         </where>
+    </select>-->
+
+    <select id="selectBookList" parameterType="Book" resultMap="BookResult">
+        <include refid="selectBookVo"/>
+        <where>
+            <if test="name != null  and name != ''"> and b.name like concat('%', #{name}, '%')</if>
+            <if test="cover != null  and cover != ''"> and b.cover = #{cover}</if>
+            <if test="author != null  and author != ''"> and b.author = #{author}</if>
+            <if test="publisher != null  and publisher != ''"> and b.publisher = #{publisher}</if>
+            <if test="isbn != null  and isbn != ''"> and b.isbn = #{isbn}</if>
+            <if test="publishDate != null "> and b.publish_date = #{publishDate}</if>
+            <if test="categoryId != null "> and b.category_id = #{categoryId}</if>
+            <if test="regionId != null "> and b.region_id = #{regionId}</if>
+            <if test="quantity != null "> and b.quantity = #{quantity}</if>
+            <if test="status != null "> and b.status = #{status}</if>
+            <if test="entryDate != null "> and b.entry_date = #{entryDate}</if>
+        </where>
     </select>
     
     <select id="selectBookById" parameterType="Long" resultMap="BookResult">
         <include refid="selectBookVo"/>
-        where id = #{id}
+        where b.id = #{id}
     </select>
 
     <insert id="insertBook" parameterType="Book" useGeneratedKeys="true" keyProperty="id">

@@ -25,7 +25,7 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="ISBN编号" prop="isbn">
+      <el-form-item label="ISBN" prop="isbn">
         <el-input
           v-model="queryParams.isbn"
           placeholder="请输入ISBN编号"
@@ -41,38 +41,53 @@
           placeholder="请选择出版日期">
         </el-date-picker>
       </el-form-item>
-      <el-form-item label="类别ID" prop="categoryId">
+
+<!--      <el-form-item label="类别ID" prop="categoryId">
         <el-input
           v-model="queryParams.categoryId"
           placeholder="请输入类别ID"
           clearable
           @keyup.enter.native="handleQuery"
         />
+      </el-form-item>-->
+
+      <el-form-item label="类别" prop="categoryId">
+        <el-select v-model="queryParams.categoryId" placeholder="请选择类别" clearable>
+          <el-option v-for="category in categories" :key="category.id" :label="category.name" :value="category.id" />
+        </el-select>
       </el-form-item>
-      <el-form-item label="区域ID" prop="regionId">
+
+<!--      <el-form-item label="区域ID" prop="regionId">
         <el-input
           v-model="queryParams.regionId"
           placeholder="请输入区域ID"
           clearable
           @keyup.enter.native="handleQuery"
         />
+      </el-form-item>-->
+
+      <el-form-item label="区域" prop="regionId">
+        <el-select v-model="queryParams.regionId" placeholder="请选择区域" clearable>
+          <el-option v-for="region in regions" :key="region.id" :label="region.name" :value="region.id" />
+        </el-select>
       </el-form-item>
-      <el-form-item label="书籍数量" prop="quantity">
+
+<!--      <el-form-item label="书籍数量" prop="quantity">
         <el-input
           v-model="queryParams.quantity"
           placeholder="请输入书籍数量"
           clearable
           @keyup.enter.native="handleQuery"
         />
-      </el-form-item>
-      <el-form-item label="入馆时间" prop="entryDate">
+      </el-form-item>-->
+<!--      <el-form-item label="入馆时间" prop="entryDate">
         <el-date-picker clearable
           v-model="queryParams.entryDate"
           type="date"
           value-format="yyyy-MM-dd"
           placeholder="请选择入馆时间">
         </el-date-picker>
-      </el-form-item>
+      </el-form-item>-->
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
         <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
@@ -136,16 +151,22 @@
       </el-table-column>
       <el-table-column label="作者" align="center" prop="author" />
       <el-table-column label="出版社" align="center" prop="publisher" />
-      <el-table-column label="ISBN编号" align="center" prop="isbn" />
+      <el-table-column label="ISBN" align="center" prop="isbn" />
       <el-table-column label="出版日期" align="center" prop="publishDate" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.publishDate, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="类别ID" align="center" prop="categoryId" />
-      <el-table-column label="区域ID" align="center" prop="regionId" />
+<!--      <el-table-column label="类别ID" align="center" prop="categoryId" />
+      <el-table-column label="区域ID" align="center" prop="regionId" />-->
+<!--   改为显示类别、区域的内容   -->
+      <el-table-column label="类别" align="center" prop="categoryName" />
+      <el-table-column label="区域" align="center" prop="regionName" />
+
       <el-table-column label="书籍数量" align="center" prop="quantity" />
-      <el-table-column label="状态" align="center" prop="status" />
+<!--      <el-table-column label="状态" align="center" prop="status" />-->
+      <el-table-column label="状态" align="center" prop="statusName" />
+
       <el-table-column label="入馆时间" align="center" prop="entryDate" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.entryDate, '{y}-{m}-{d}') }}</span>
@@ -171,7 +192,7 @@
         </template>
       </el-table-column>
     </el-table>
-    
+
     <pagination
       v-show="total>0"
       :total="total"
@@ -195,7 +216,7 @@
         <el-form-item label="出版社" prop="publisher">
           <el-input v-model="form.publisher" placeholder="请输入出版社" />
         </el-form-item>
-        <el-form-item label="ISBN编号" prop="isbn">
+        <el-form-item label="ISBN" prop="isbn">
           <el-input v-model="form.isbn" placeholder="请输入ISBN编号" />
         </el-form-item>
         <el-form-item label="出版日期" prop="publishDate">
@@ -206,12 +227,27 @@
             placeholder="请选择出版日期">
           </el-date-picker>
         </el-form-item>
-        <el-form-item label="类别ID" prop="categoryId">
+
+<!--        <el-form-item label="类别ID" prop="categoryId">
           <el-input v-model="form.categoryId" placeholder="请输入类别ID" />
+        </el-form-item>-->
+<!--    在对话框改为下拉框显示   -->
+        <el-form-item label="类别" prop="categoryId">
+          <el-select v-model="form.categoryId" placeholder="请选择类别">
+            <el-option v-for="category in categories" :key="category.id" :label="category.name" :value="category.id" />
+          </el-select>
         </el-form-item>
-        <el-form-item label="区域ID" prop="regionId">
+
+<!--        <el-form-item label="区域ID" prop="regionId">
           <el-input v-model="form.regionId" placeholder="请输入区域ID" />
+        </el-form-item>-->
+<!--    改为下拉框显示   -->
+        <el-form-item label="区域" prop="regionId">
+          <el-select v-model="form.regionId" placeholder="请选择区域">
+            <el-option v-for="region in regions" :key="region.id" :label="region.name" :value="region.id" />
+          </el-select>
         </el-form-item>
+
         <el-form-item label="书籍数量" prop="quantity">
           <el-input v-model="form.quantity" placeholder="请输入书籍数量" />
         </el-form-item>
@@ -236,6 +272,8 @@
 </template>
 
 <script>
+//导入 request 模块
+import request from '@/utils/request'
 import { listBook, getBook, delBook, addBook, updateBook } from "@/api/manage/book";
 
 export default {
@@ -261,6 +299,12 @@ export default {
       // 是否显示弹出层
       open: false,
       // 查询参数
+
+      //类别选项
+      categories: [],
+      //区域选项
+      regions: [],
+
       queryParams: {
         pageNum: 1,
         pageSize: 10,
@@ -315,8 +359,44 @@ export default {
   },
   created() {
     this.getList();
+    this.fetchCategories();
+    this.fetchRegions();
   },
   methods: {
+    /** 查询类别列表 */
+    fetchCategories() {
+      request({
+        url: '/manage/category/list',
+        method: 'get'
+      }).then(response => {
+        console.log('Categories response:', response); // 调试输出
+        if (response.code === 200) {
+          this.categories = response.rows;
+        } else {
+          this.$message.error('获取类别列表失败');
+        }
+      }).catch(error => {
+        console.error('Fetch categories error:', error);
+        this.$message.error('请求类别列表出错');
+      });
+    },
+    /** 查询区域列表 */
+    fetchRegions() {
+      request({
+        url: '/manage/region/list',
+        method: 'get'
+      }).then(response => {
+        console.log('Regions response:', response); //调试输出
+        if (response.code === 200) {
+          this.regions = response.rows;
+        } else {
+          this.$message.error('获取区域列表失败');
+        }
+      }).catch(error => {
+        console.error('Fetch regions error:', error);
+        this.$message.error('请求区域列表出错');
+      })
+    },
     /** 查询书籍列表 */
     getList() {
       this.loading = true;

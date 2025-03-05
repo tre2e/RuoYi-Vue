@@ -41,7 +41,28 @@ public class BookServiceImpl implements IBookService
     @Override
     public List<Book> selectBookList(Book book)
     {
-        return bookMapper.selectBookList(book);
+        // 调用Mapper查询数据
+        List<Book> booklist = bookMapper.selectBookList(book);
+
+        // 转换 status 为描述文字
+        for (Book book1 : booklist) {
+            if (book1.getStatus() != null) {
+                switch (book1.getStatus()) {
+                    case 0:
+                        book1.setStatusName("不可借");
+                        break;
+                    case 1:
+                        book1.setStatusName("可借");
+                        break;
+                    case 2:
+                        book1.setStatusName("未到馆");
+                        break;
+                    default:
+                        book1.setStatusName("请询问管理员");
+                }
+            }
+        }
+        return booklist;
     }
 
     /**
