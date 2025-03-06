@@ -2,6 +2,8 @@ package com.ruoyi.manage.controller;
 
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
+
+import com.ruoyi.manage.domain.Book;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,6 +43,15 @@ public class BookCategoryController extends BaseController
     @GetMapping("/list")
     public TableDataInfo list(BookCategory bookCategory)
     {
+        startPage();
+        List<BookCategory> list = bookCategoryService.selectBookCategoryList(bookCategory);
+        return getDataTable(list);
+    }
+
+    // 新增检索接口（开放给登录用户）
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/search")
+    public TableDataInfo searchList(BookCategory bookCategory) {
         startPage();
         List<BookCategory> list = bookCategoryService.selectBookCategoryList(bookCategory);
         return getDataTable(list);

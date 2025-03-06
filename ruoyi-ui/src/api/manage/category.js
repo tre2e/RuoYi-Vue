@@ -9,6 +9,15 @@ export function listCategory(query) {
   })
 }
 
+// 用户检索书籍类别
+export function searchCategory(query) {
+  return request({
+    url: '/manage/category/search',
+    method: 'get',
+    params: query
+  })
+}
+
 // 查询类别管理详细
 export function getCategory(id) {
   return request({

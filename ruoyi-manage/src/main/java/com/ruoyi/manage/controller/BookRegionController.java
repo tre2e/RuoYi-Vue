@@ -47,6 +47,18 @@ public class BookRegionController extends BaseController
     }
 
     /**
+     * 用户检索书籍区域
+     */
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/search")
+    public TableDataInfo searchList(BookRegion bookRegion)
+    {
+        startPage();
+        List<BookRegion> list = bookRegionService.selectBookRegionList(bookRegion);
+        return getDataTable(list);
+    }
+
+    /**
      * 导出区域管理列表
      */
     @PreAuthorize("@ss.hasPermi('manage:region:export')")

@@ -9,6 +9,15 @@ export function listBook(query) {
   })
 }
 
+// 检索接口
+export function searchBook(query) {
+  return request({
+    url: '/manage/book/search',
+    method: 'get',
+    params: query
+  })
+}
+
 // 查询书籍详细
 export function getBook(id) {
   return request({

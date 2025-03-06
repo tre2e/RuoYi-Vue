@@ -1,104 +1,215 @@
 <template>
-  <div class="book-search">
-    <!-- 搜索表单 -->
-    <el-form :inline="true" :model="queryParams" ref="queryForm" @submit.native.prevent>
-      <el-form-item label="书名">
-        <el-input v-model="queryParams.bookName" placeholder="请输入书名" clearable></el-input>
+  <div class="app-container">
+    <!-- 馆藏检索表单 -->
+    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" label-width="80px" @submit.native.prevent>
+      <el-form-item label="书籍名称" prop="name">
+        <el-input v-model="queryParams.name" placeholder="请输入书籍名称" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
-      <el-form-item label="作者">
-        <el-input v-model="queryParams.author" placeholder="请输入作者" clearable></el-input>
+      <el-form-item label="作者" prop="author">
+        <el-input v-model="queryParams.author" placeholder="请输入作者" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
+      <el-form-item label="出版社" prop="publisher">
+        <el-input v-model="queryParams.publisher" placeholder="请输入出版社" clearable @keyup.enter.native="handleQuery" />
+      </el-form-item>
+      <el-form-item label="ISBN" prop="isbn">
+        <el-input v-model="queryParams.isbn" placeholder="请输入ISBN编号" clearable @keyup.enter.native="handleQuery" />
+      </el-form-item>
+      <el-form-item label="出版日期" prop="publishDateRange">
+        <el-date-picker
+          v-model="queryParams.publishDateRange"
+          type="daterange"
+          range-separator="至"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          value-format="yyyy-MM-dd"
+          clearable
+        />
+      </el-form-item>
+      <el-form-item label="类别" prop="categoryId">
+        <el-select v-model="queryParams.categoryId" placeholder="请选择类别" clearable>
+          <el-option v-for="category in categories" :key="category.id" :label="category.name" :value="category.id" />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="区域" prop="regionId">
+        <el-select v-model="queryParams.regionId" placeholder="请选择区域" clearable>
+          <el-option v-for="region in regions" :key="region.id" :label="region.name" :value="region.id" />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="入馆时间" prop="entryDateRange">
+        <el-date-picker
+          v-model="queryParams.entryDateRange"
+          type="daterange"
+          range-separator="至"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          value-format="yyyy-MM-dd"
+          clearable
+        />
+      </el-form-item>
+<!--      <el-form-item label="状态" prop="status">
+        <el-select v-model="queryParams.status" placeholder="请选择状态" clearable>
+          <el-option label="正常" value="0" />
+          <el-option label="禁用" value="1" />
+        </el-select>
+      </el-form-item>-->
       <el-form-item>
-        <el-button type="primary" icon="el-icon-search" @click="handleQuery">搜索</el-button>
-        <el-button icon="el-icon-refresh" @click="resetQuery">重置</el-button>
+        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
+        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
 
-    <!-- 结果表格 -->
-    <el-table
-      v-loading="loading"
-      :data="bookList"
-      border
-      style="width: 100%"
-    >
-      <el-table-column prop="name" label="书名" width="200"></el-table-column>
+    <!-- 检索结果表格 -->
+    <el-table v-loading="loading" :data="bookList" border>
+      <el-table-column label="书籍ID" align="center" prop="id" width="80" />
+      <el-table-column label="书籍名称" align="center" prop="name" />
       <el-table-column label="封面" align="center" prop="cover" width="100">
         <template slot-scope="scope">
-          <image-preview :src="scope.row.cover" :width="50" :height="50"/>
+          <image-preview :src="scope.row.cover" :width="50" :height="50" />
         </template>
       </el-table-column>
-      <el-table-column prop="author" label="作者" width="150"></el-table-column>
-      <el-table-column prop="publisher" label="出版社"></el-table-column>
-      <el-table-column prop="publishDate" label="出版日期" width="150"></el-table-column>
+      <el-table-column label="作者" align="center" prop="author" />
+      <el-table-column label="出版社" align="center" prop="publisher" />
+      <el-table-column label="ISBN" align="center" prop="isbn" />
+      <el-table-column label="出版日期" align="center" prop="publishDate" width="120">
+        <template slot-scope="scope">
+          <span>{{ parseTime(scope.row.publishDate, '{y}-{m}-{d}') }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="类别" align="center" prop="categoryName" />
+      <el-table-column label="区域" align="center" prop="regionName" />
+      <el-table-column label="书籍数量" align="center" prop="quantity" width="80" />
+      <el-table-column label="状态" align="center" prop="statusName" width="80" />
+      <el-table-column label="入馆时间" align="center" prop="entryDate" width="120">
+        <template slot-scope="scope">
+          <span>{{ parseTime(scope.row.entryDate, '{y}-{m}-{d}') }}</span>
+        </template>
+      </el-table-column>
     </el-table>
 
     <!-- 分页 -->
-    <el-pagination
+    <pagination
+      v-show="total > 0"
+      :total="total"
+      :page.sync="queryParams.pageNum"
+      :limit.sync="queryParams.pageSize"
+      @pagination="getList"
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
-      :current-page="queryParams.pageNum"
-      :page-sizes="[10, 20, 30, 50]"
-      :page-size="queryParams.pageSize"
-      layout="total, sizes, prev, pager, next, jumper"
-      :total="total"
-    ></el-pagination>
+    />
   </div>
 </template>
 
 <script>
-import { listBook } from '@/api/manage/book' // 复用你已有的接口
+import request from '@/utils/request' // 导入 request
+import { searchBook } from '@/api/manage/book' // 使用新接口
 
 export default {
-  name: 'BookSearch',
+  name: 'BookCollectionSearch',
   data() {
     return {
-      // 查询参数，与后端 Book 实体字段保持一致
+      loading: false,
+      total: 0,
+      bookList: [],
+      categories: [],
+      regions: [],
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        bookName: '',
-        author: ''
+        name: null,
+        author: null,
+        publisher: null,
+        isbn: null,
+        publishDateBegin: null,
+        publishDateEnd: null,
+        categoryId: null,
+        regionId: null,
+        entryDateBegin: null,
+        entryDateEnd: null,
+        status: null
+      }
+    }
+  },
+  computed: {
+    publishDateRange: {
+      get() {
+        return [this.queryParams.publishDateBegin, this.queryParams.publishDateEnd]
       },
-      // 书籍列表
-      bookList: [],
-      // 总数
-      total: 0,
-      // 加载状态
-      loading: false
+      set(val) {
+        this.queryParams.publishDateBegin = val ? val[0] : null
+        this.queryParams.publishDateEnd = val ? val[1] : null
+      }
+    },
+    entryDateRange: {
+      get() {
+        return [this.queryParams.entryDateBegin, this.queryParams.entryDateEnd]
+      },
+      set(val) {
+        this.queryParams.entryDateBegin = val ? val[0] : null
+        this.queryParams.entryDateEnd = val ? val[1] : null
+      }
     }
   },
   created() {
-    this.getList() // 页面加载时默认查询
+    this.fetchCategories()
+    this.fetchRegions()
+    this.getList()
   },
   methods: {
-    // 获取书籍列表
-    getList() {
-      this.loading = true
-      listBook(this.queryParams).then(response => {
-        // 假设返回数据格式为 RuoYi 标准格式
-        this.bookList = response.rows // 或 response.data.rows，视你的接口返回而定
-        this.total = response.total // 或 response.data.total
-        this.loading = false
-      }).catch(() => {
-        this.loading = false
+    fetchCategories() {
+      request({
+        url: '/manage/category/search',
+        method: 'get'
+      }).then(response => {
+        if (response.code === 200) {
+          this.categories = response.rows
+        } else {
+          this.$message.error('获取类别列表失败')
+        }
+      }).catch(error => {
+        console.error('Fetch categories error:', error)
       })
     },
-    // 搜索
+    fetchRegions() {
+      request({
+        url: '/manage/region/search',
+        method: 'get'
+      }).then(response => {
+        if (response.code === 200) {
+          this.regions = response.rows
+        } else {
+          this.$message.error('获取区域列表失败')
+        }
+      }).catch(error => {
+        console.error('Fetch regions error:', error)
+      })
+    },
+    getList() {
+      this.loading = true
+      searchBook(this.queryParams).then(response => {
+        this.bookList = response.rows
+        this.total = response.total
+        this.loading = false
+      }).catch(error => {
+        this.loading = false
+        console.error('Error fetching book list:', error)
+        this.$message.error('查询失败')
+      })
+    },
     handleQuery() {
-      this.queryParams.pageNum = 1 // 重置到第一页
+      this.queryParams.pageNum = 1
       this.getList()
     },
-    // 重置
     resetQuery() {
-      this.resetForm('queryForm') // RuoYi 提供的表单重置工具方法
+      this.$refs['queryForm'].resetFields() // 重置表单字段
+      this.publishDateRange = null // 手动重置出版日期
+      this.entryDateRange = null   // 手动重置入馆时间
+      this.queryParams.status = null // 手动重置状态（不影响表格）
       this.handleQuery()
     },
-    // 分页大小改变
     handleSizeChange(val) {
       this.queryParams.pageSize = val
       this.getList()
     },
-    // 当前页改变
     handleCurrentChange(val) {
       this.queryParams.pageNum = val
       this.getList()
@@ -108,7 +219,7 @@ export default {
 </script>
 
 <style scoped>
-.book-search {
+.app-container {
   padding: 20px;
 }
 </style>

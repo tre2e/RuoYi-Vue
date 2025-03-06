@@ -46,6 +46,15 @@ public class BookController extends BaseController
         return getDataTable(list);
     }
 
+    // 新增检索接口（无需权限或仅需登录）
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/search")
+    public TableDataInfo search(Book book) {
+        startPage();
+        List<Book> list = bookService.selectBookList(book);
+        return getDataTable(list);
+    }
+
     /**
      * 导出书籍列表
      */

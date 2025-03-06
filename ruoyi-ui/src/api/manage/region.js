@@ -9,6 +9,15 @@ export function listRegion(query) {
   })
 }
 
+// 用户检索书籍区域
+export function searchRegion(query) {
+  return request({
+    url: '/manage/region/search',
+    method: 'get',
+    params: query
+  })
+}
+
 // 查询区域管理详细
 export function getRegion(id) {
   return request({
