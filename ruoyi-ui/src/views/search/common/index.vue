@@ -84,6 +84,19 @@
           <span>{{ parseTime(scope.row.entryDate, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
+
+      <!-- 添加操作列    可选（添加借阅按钮权限显示）：v-hasPermi="['manage:issue:add']"-->
+      <el-table-column label="操作" align="center" width="100">
+        <template slot-scope="scope">
+          <el-button
+            size="mini"
+            type="primary"
+            icon="el-icon-plus"
+            @click="handleBorrow(scope.row)"
+
+          >借阅</el-button>
+        </template>
+      </el-table-column>
     </el-table>
 
     <!-- 分页 -->
@@ -96,12 +109,55 @@
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
     />
+
+    <!-- 借阅对话框 -->
+    <el-dialog :title="borrowTitle" :visible.sync="borrowOpen" width="500px" append-to-body>
+      <el-form ref="borrowForm" :model="borrowForm" :rules="borrowRules" label-width="80px">
+
+<!--        <el-form-item label="用户ID" prop="userId">
+          <el-input v-model="borrowForm.userId" placeholder="请输入用户ID" />
+        </el-form-item>
+        <el-form-item label="书籍ID" prop="bookId">
+          <el-input v-model="borrowForm.bookId" placeholder="书籍ID" disabled />
+        </el-form-item>-->
+        <el-form-item label="用户名" prop="userName">
+          <el-input v-model="borrowForm.userName" disabled />
+        </el-form-item>
+        <el-form-item label="书籍名称" prop="bookName">
+          <el-input v-model="borrowForm.bookName" disabled />
+        </el-form-item>
+
+        <el-form-item label="借阅日期" prop="issueDate">
+          <el-date-picker
+            v-model="borrowForm.issueDate"
+            type="date"
+            value-format="yyyy-MM-dd"
+            placeholder="请选择借阅日期"
+          />
+        </el-form-item>
+        <el-form-item label="应还日期" prop="dueDate">
+          <el-date-picker
+            v-model="borrowForm.dueDate"
+            type="date"
+            value-format="yyyy-MM-dd"
+            placeholder="请选择应还日期"
+          />
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitBorrowForm">确 定</el-button>
+        <el-button @click="cancelBorrow">取 消</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import request from '@/utils/request' // 导入 request
 import { searchBook } from '@/api/manage/book' // 使用新接口
+/*import { addIssue } from '@/api/manage/issue'; // 借阅 API*/
+import { addIssueWithQuantity } from '@/api/manage/issue'; // 新增接口
+import { getUserProfile } from '@/api/system/user';  // 获取用户信息
 
 export default {
   name: 'BookCollectionSearch',
@@ -126,8 +182,26 @@ export default {
         entryDateBegin: null,
         entryDateEnd: null,
         status: null
+      },
+      // 借阅相关数据
+      borrowOpen: false,
+      borrowTitle: "借阅书籍",
+      borrowForm: {
+        userId: null,
+        userName: null, // 显示用
+        bookId: null,
+        bookName: null,     // 显示用
+        issueDate: null,
+        dueDate: null,
+        status: 0 // 默认未归还
+      },
+      borrowRules: {
+        /*userId: [{ required: true, message: "用户ID不能为空", trigger: "blur" }],
+        bookId: [{ required: true, message: "书籍ID不能为空", trigger: "blur" }],*/
+        issueDate: [{ required: true, message: "借阅日期不能为空", trigger: "change" }],
+        dueDate: [{ required: true, message: "应还日期不能为空", trigger: "change" }]
       }
-    }
+    };   //添加分号
   },
   computed: {
     publishDateRange: {
@@ -153,6 +227,7 @@ export default {
     this.fetchCategories()
     this.fetchRegions()
     this.getList()
+    this.fetchUserProfile()
   },
   methods: {
     fetchCategories() {
@@ -213,9 +288,86 @@ export default {
     handleCurrentChange(val) {
       this.queryParams.pageNum = val
       this.getList()
+    },
+    // 获取用户信息
+    fetchUserProfile() {
+      getUserProfile()
+        .then(response => {
+          console.log('User Profile Response:', response);
+          if (response && response.data) {
+            // 根据实际结构调整
+            this.borrowForm.userId = response.data.user?.userId || response.data.userId;
+            this.borrowForm.userName = response.data.user?.userName || response.data.userName;
+          } else {
+            console.error('Unexpected response format:', response);
+            this.$message.error('用户信息格式错误');
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching user profile:', error);
+          this.$message.error('获取用户信息失败');
+        });
+      },
+    // 借阅相关方法
+    handleBorrow(row) {
+      this.resetBorrow();
+      this.fetchUserProfile(); // 每次打开借阅时刷新用户信息（可选）
+      this.borrowForm.bookId = row.id; // 从表格行获取书籍ID
+      this.borrowForm.bookName = row.name; // 从表格行获取书籍名
+      this.borrowOpen = true;
+      this.borrowTitle = `借阅书籍: ${row.name}`;
+    },
+    resetBorrow() {
+      this.borrowForm = {
+        userId: this.borrowForm.userId, // 保留当前用户ID
+        userName: this.borrowForm.userName, // 保留当前用户名
+        bookId: null,
+        bookName: null,
+        issueDate: null,
+        dueDate: null,
+        status: 0
+      };
+      this.resetForm("borrowForm");
+    },
+    cancelBorrow() {
+      this.borrowOpen = false;
+      this.resetBorrow();
+    },
+    // 新增借阅
+    submitBorrowForm() {
+      this.$refs["borrowForm"].validate(valid => {
+        if (valid) {
+          const submitData = {
+            userId: this.borrowForm.userId,
+            bookId: this.borrowForm.bookId,
+            issueDate: this.borrowForm.issueDate,
+            dueDate: this.borrowForm.dueDate,
+            status: 0
+          };
+          addIssueWithQuantity(submitData)
+            .then(response => {
+              if (response.code === 200) {
+                this.$modal.msgSuccess("借阅成功");
+                this.borrowOpen = false;
+                this.resetBorrow();
+                this.getList(); // 刷新列表，显示更新后的 quantity
+              } else if (response.code === 400 && response.msg === "库存不足") {
+                this.$modal.msgError("书籍库存不足，无法借阅");
+              } else {
+                this.$modal.msgError(response.msg || "借阅失败");
+              }
+            })
+            .catch(error => {
+              console.error('Borrow error:', error);
+              this.$message.error('借阅失败');
+            });
+        }
+      });
     }
   }
-}
+};   //添加分号
+
+
 </script>
 
 <style scoped>
