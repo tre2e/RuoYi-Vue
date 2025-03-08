@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
+import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.manage.domain.Book;
 import com.ruoyi.manage.domain.vo.BookIssueVo;
 import com.ruoyi.manage.service.IBookService;
@@ -52,6 +53,21 @@ public class BookIssueController extends BaseController
     {
         startPage();
         List<BookIssueVo> list = bookIssueService.selectBookIssueList(bookIssue);   // 返回Vo
+        return getDataTable(list);
+    }
+
+    /**
+     * 查询当前用户的借阅列表（用户自助用）
+     */
+    @PreAuthorize("isAuthenticated()") // 仅需登录
+    @GetMapping("/myList")
+    public TableDataInfo myList(BookIssue bookIssue)
+    {
+        startPage();
+        // 设置当前登录用户的 ID
+        Long currentUserId = SecurityUtils.getUserId(); // 获取当前用户 ID
+        bookIssue.setUserId(currentUserId); // 过滤只显示当前用户的记录
+        List<BookIssueVo> list = bookIssueService.selectBookIssueList(bookIssue);
         return getDataTable(list);
     }
 

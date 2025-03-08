@@ -42,6 +42,17 @@ public class BookIssueVo {
     @Excel(name = "状态名称")
     private String statusName;
 
+    @Excel(name = "封面") // 新增封面字段
+    private String cover; // 与 Book 类的字段名一致
+
+    public String getCover() {
+        return cover;
+    }
+
+    public void setCover(String cover) {
+        this.cover = cover;
+    }
+
     public String getStatusName() {
         return statusName;
     }

@@ -293,7 +293,7 @@ export default {
     fetchUserProfile() {
       getUserProfile()
         .then(response => {
-          console.log('User Profile Response:', response);
+          /*console.log('User Profile Response:', response);*/  // 调试用
           if (response && response.data) {
             // 根据实际结构调整
             this.borrowForm.userId = response.data.user?.userId || response.data.userId;

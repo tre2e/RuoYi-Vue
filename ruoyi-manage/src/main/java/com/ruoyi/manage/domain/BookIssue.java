@@ -49,6 +49,25 @@ public class BookIssue extends BaseEntity
 
     /* 新增字段显示状态内容 */
     private String statusName;   // 状态名称
+    // 查询条件字段
+    private String userName;
+    private String bookName;
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getBookName() {
+        return bookName;
+    }
+
+    public void setBookName(String bookName) {
+        this.bookName = bookName;
+    }
 
     public String getStatusName() {
         return statusName;

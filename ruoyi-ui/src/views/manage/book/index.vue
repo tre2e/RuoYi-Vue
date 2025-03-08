@@ -369,7 +369,7 @@ export default {
         url: '/manage/category/list',
         method: 'get'
       }).then(response => {
-        console.log('Categories response:', response); // 调试输出
+        /*console.log('Categories response:', response); // 调试输出*/
         if (response.code === 200) {
           this.categories = response.rows;
         } else {
@@ -386,7 +386,7 @@ export default {
         url: '/manage/region/list',
         method: 'get'
       }).then(response => {
-        console.log('Regions response:', response); //调试输出
+        /*console.log('Regions response:', response); //调试输出*/
         if (response.code === 200) {
           this.regions = response.rows;
         } else {

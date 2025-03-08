@@ -9,6 +9,15 @@ export function listIssue(query) {
   })
 }
 
+// 查询当前用户的借阅列表（用户自助用）
+export function listMyIssues(query) {
+  return request({
+    url: '/manage/issue/myList',
+    method: 'get',
+    params: query
+  })
+}
+
 // 查询用户借阅详细
 export function getIssue(id) {
   return request({

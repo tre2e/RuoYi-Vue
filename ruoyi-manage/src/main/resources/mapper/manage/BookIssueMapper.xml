@@ -30,7 +30,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="dueDate" column="due_date" />
         <result property="returnDate" column="return_date" />
         <result property="status" column="status" />
+        <result property="statusName" column="status_name" /> <!-- 映射 statusName -->
         <result property="remark" column="remark" />
+        <result property="cover" column="cover" /> <!-- 新增封面映射 -->
     </resultMap>
     <!-- 添加sql查询  -->
     <sql id="selectBookIssueVo">
@@ -44,12 +46,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             bi.due_date,
             bi.return_date,
             bi.status,
-            <!--CASE bi.status
+            CASE bi.status
                 WHEN 0 THEN '未归还'
                 WHEN 1 THEN '已归还'
-                ELSE '未知'
-            END AS status_name,  &lt;!&ndash; 添加 status_name 映射 &ndash;&gt;-->
-            bi.remark
+                ELSE '请联系管理员'
+            END AS status_name,  <!-- 添加 status_name 映射 -->
+            bi.remark,
+            mb.cover
         FROM
             book_issue bi
                 LEFT JOIN
@@ -80,6 +83,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <where>
             <if test="userId != null "> and bi.user_id = #{userId}</if>
             <if test="bookId != null "> and bi.book_id = #{bookId}</if>
+            <if test="userName != null and userName != ''"> AND su.user_name = #{userName}</if> <!-- 改为精确查询 -->
+            <if test="bookName != null and bookName != ''"> AND mb.name LIKE concat('%', #{bookName}, '%')</if>
             <if test="issueDate != null "> and bi.issue_date = #{issueDate}</if>
             <if test="dueDate != null "> and bi.due_date = #{dueDate}</if>
             <if test="returnDate != null "> and bi.return_date = #{returnDate}</if>

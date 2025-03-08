@@ -9,10 +9,26 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
+      <el-form-item label="用户名" prop="userName">
+        <el-input
+          v-model="queryParams.userName"
+          placeholder="请输入用户名"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
       <el-form-item label="书籍ID" prop="bookId">
         <el-input
           v-model="queryParams.bookId"
           placeholder="请输入书籍ID"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="书籍名" prop="bookName">
+        <el-input
+          v-model="queryParams.bookName"
+          placeholder="请输入书籍名"
           clearable
           @keyup.enter.native="handleQuery"
         />
@@ -240,6 +256,8 @@ export default {
         pageSize: 10,
         userId: null,
         bookId: null,
+        userName: null, // 新增用户名查询参数
+        bookName: null, // 新增书籍名查询参数
         issueDate: null,
         dueDate: null,
         returnDate: null,
@@ -310,6 +328,8 @@ export default {
     /** 重置按钮操作 */
     resetQuery() {
       this.resetForm("queryForm");
+      this.queryParams.userName = null; // 重置新增字段
+      this.queryParams.bookName = null; // 重置新增字段
       this.handleQuery();
     },
     // 多选框选中数据
