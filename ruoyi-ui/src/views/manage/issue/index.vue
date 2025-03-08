@@ -209,7 +209,8 @@
 </template>
 
 <script>
-import { listIssue, getIssue, delIssue, addIssue, updateIssue } from "@/api/manage/issue";
+import { listIssue, getIssue, delIssue, addIssue, updateIssue, addIssueWithQuantity } from "@/api/manage/issue";
+import request from '@/utils/request'; // 确保导入 request
 
 export default {
   name: "Issue",
@@ -342,49 +343,94 @@ export default {
       })
         .then(() => {
           // 发送归还请求
-          this.$axios
-            .put(`/manage/issue/return/${id}`)
+          /*this.$axios.put(`/manage/issue/return/${id}`)       // 相对路径，依赖前端代理*/
+          return request({
+            url: `/manage/issue/return/${id}`,
+            method: 'put'
+          })
             .then((response) => {
-              if (response.data.code === 200) {
+              /*console.log('Response:', response); // 调试用*/
+              if (!response) {
+                this.$message.error('归还失败: 响应数据为空');
+                return;
+              }
+              const code = response.code || 200;
+              const msg = response.msg || '操作成功';
+              if (code === 200) {
                 this.$message.success('归还成功');
-                // 刷新借阅列表
                 this.getList();
               } else {
-                this.$message.error('归还失败: ' + response.data.msg);
+                this.$message.error('归还失败: ' + msg);
               }
             })
-            .catch((error) => {
-              this.$message.error('归还失败: ' + error.message);
+            .catch(error => {
+              console.error('Request error:', error); // 调试错误
+              this.$message.error('归还失败: ' + (error.message || '请求异常'));
             });
         })
         .catch(() => {
           this.$message.info('已取消归还');
         });
     },
-    /** 提交按钮 */
-    submitForm() {
-      this.$refs["form"].validate(valid => {
-        if (valid) {
-          if (this.form.id != null) {
-            updateIssue(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功");
-              this.open = false;
-              this.getList();
-            });
-          } else {
-            addIssue(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功");
-              this.open = false;
-              this.getList();
-            });
-          }
+    /** 提交按钮 - 修改为绑定数量 */
+    async submitForm() {
+      try {
+        const valid = await this.$refs["form"].validate();
+        if (!valid) return;
+
+        let response;
+        if (this.form.id != null) {
+          response = await updateIssue(this.form);
+        } else {
+          response = await addIssueWithQuantity(this.form).catch(error => {
+            // 捕获后端抛出的业务错误
+            const msg = error.message || "新增失败";
+            this.$modal.msgError(msg); // 直接显示后端 msg
+            return null; // 返回 null 表示已处理
+          });
         }
-      });
+
+        // 如果 response 为 null，说明已在 catch 中处理
+        if (!response) return;
+
+        console.log('Response:', response);
+
+        if (response.code === 200) {
+          this.$modal.msgSuccess(this.form.id ? "修改成功" : "新增成功");
+          this.open = false;
+          this.getList();
+        } else {
+          this.$modal.msgError(response.msg || (this.form.id ? "修改失败" : "新增失败"));
+        }
+      } catch (error) {
+        // 只处理表单验证或其他意外错误
+        if (error.message !== "您已借阅此书，无法重复借阅" && // 避免重复显示已处理的消息
+          error.message !== "您已借阅10本书，无法再借更多" &&
+          error.message !== "库存不足") {
+          this.$modal.msgError("请求失败: " + (error.message || "网络异常"));
+        }
+      }
     },
-    /** 删除按钮操作 */
+    /** 删除按钮操作 - 修改为检查归还状态 */
     handleDelete(row) {
-      const ids = row.id || this.ids;
-      this.$modal.confirm('是否确认删除用户借阅编号为"' + ids + '"的数据项？').then(function() {
+      const ids = row.id || this.ids; // 支持单条或批量删除
+      // 如果是单条删除，直接检查 row 的状态
+      if (row.id) {
+        if (row.status === 0) {
+          this.$modal.msgError("请先归还书籍后再删除该借阅记录");
+          return;
+        }
+      } else {
+        // 批量删除，检查所有选中记录的状态
+        const selectedRows = this.issueList.filter(item => this.ids.includes(item.id));
+        const unreturned = selectedRows.some(item => item.status === 0);
+        if (unreturned) {
+          this.$modal.msgError("请先归还所有选中的书籍后再删除");
+          return;
+        }
+      }
+      // 如果已归还，执行删除
+      this.$modal.confirm('是否确认删除用户借阅编号为"' + ids + '"的数据项？').then(() => {
         return delIssue(ids);
       }).then(() => {
         this.getList();

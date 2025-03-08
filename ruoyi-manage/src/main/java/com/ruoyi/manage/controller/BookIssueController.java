@@ -101,6 +101,21 @@ public class BookIssueController extends BaseController
         if (book == null || book.getQuantity() <= 0) {
             return AjaxResult.error("库存不足");
         }
+
+        // 检查用户借阅总数
+        List<BookIssueVo> userIssues = bookIssueService.selectBookIssueList(
+                new BookIssue() {{ setUserId(bookIssue.getUserId()); setStatus(0); }}
+        );
+        if (userIssues.size() >= 10) {
+            return AjaxResult.error("您已借阅10本书，无法再借更多");
+        }
+
+        // 检查重复借阅
+        boolean hasBorrowed = userIssues.stream().anyMatch(item -> item.getBookId() != null && item.getBookId().equals(bookIssue.getBookId()));
+        if (hasBorrowed) {
+            return AjaxResult.error("您已借阅此书，无法重复借阅");
+        }
+
         book.setQuantity(book.getQuantity() - 1);               // 借出一本书
         bookService.updateBook(book);
         int result = bookIssueService.insertBookIssue(bookIssue);

@@ -8,6 +8,15 @@ public class BookIssueVo {
 
     private Long id;
 
+    /** 用户ID */
+    @Excel(name = "用户ID")
+    private Long userId;
+
+    /** 书籍ID */
+    @Excel(name = "书籍ID")
+    private Long bookId;
+
+
     @Excel(name = "用户名")
     private String userName; // 新增用户名字段
 
@@ -60,4 +69,19 @@ public class BookIssueVo {
     public void setStatus(Integer status) { this.status = status; }
     public String getRemark() { return remark; }
     public void setRemark(String remark) { this.remark = remark; }
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public Long getBookId() {
+        return bookId;
+    }
+
+    public void setBookId(Long bookId) {
+        this.bookId = bookId;
+    }
 }

@@ -36,6 +36,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <sql id="selectBookIssueVo">
         SELECT
             bi.id,
+            bi.user_id,      <!-- 添加 user_id -->
+            bi.book_id,      <!-- 添加 book_id -->
             su.user_name,
             mb.name,
             bi.issue_date,
