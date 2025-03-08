@@ -29,6 +29,18 @@ public class BookIssueVo {
     @Excel(name = "状态", readConverterExp = "0=未归还,1=已归还")
     private Integer status;
 
+    // 新增 statusName 字段
+    @Excel(name = "状态名称")
+    private String statusName;
+
+    public String getStatusName() {
+        return statusName;
+    }
+
+    public void setStatusName(String statusName) {
+        this.statusName = statusName;
+    }
+
     private String remark;
 
     // Getters and Setters

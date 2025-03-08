@@ -122,22 +122,35 @@
       <el-table-column label="状态" align="center" prop="statusName" />
 
       <el-table-column label="备注" align="center" prop="remark" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="240" >
         <template slot-scope="scope">
           <el-button
             size="mini"
-            type="text"
+            type="primary"
             icon="el-icon-edit"
             @click="handleUpdate(scope.row)"
             v-hasPermi="['manage:issue:edit']"
+            plain
+            class="custom-button"
           >修改</el-button>
           <el-button
             size="mini"
-            type="text"
+            type="danger"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
             v-hasPermi="['manage:issue:remove']"
+            plain
+            class="custom-button"
           >删除</el-button>
+          <el-button
+            v-if="!scope.row.returnDate"
+            size="mini"
+            type="success"
+            icon="el-icon-check"
+            @click="handleReturn(scope.row.id)"
+            plain
+            class="custom-button"
+          >归还</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -320,6 +333,34 @@ export default {
         this.title = "修改用户借阅";
       });
     },
+    /** 归还按钮操作 */
+    handleReturn(id) {
+      this.$confirm('是否确认归还该借阅记录？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          // 发送归还请求
+          this.$axios
+            .put(`/manage/issue/return/${id}`)
+            .then((response) => {
+              if (response.data.code === 200) {
+                this.$message.success('归还成功');
+                // 刷新借阅列表
+                this.getList();
+              } else {
+                this.$message.error('归还失败: ' + response.data.msg);
+              }
+            })
+            .catch((error) => {
+              this.$message.error('归还失败: ' + error.message);
+            });
+        })
+        .catch(() => {
+          this.$message.info('已取消归还');
+        });
+    },
     /** 提交按钮 */
     submitForm() {
       this.$refs["form"].validate(valid => {
@@ -359,3 +400,21 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+/* 美化操作栏按钮 */
+.el-table .small-padding .cell .custom-button {
+  margin-right: 8px; /* 增大按钮间距 */
+  padding: 6px 6px; /* 增加按钮内边距，左右12px，上下6px */
+}
+
+/* 移除最后一个按钮的右边距 */
+.el-table .small-padding .cell .custom-button:last-child {
+  margin-right: 0;
+}
+
+/* 可选：调整按钮文字与图标的间距 */
+.custom-button .el-icon {
+  margin-right: 4px; /* 图标与文字之间的间距 */
+}
+</style>
