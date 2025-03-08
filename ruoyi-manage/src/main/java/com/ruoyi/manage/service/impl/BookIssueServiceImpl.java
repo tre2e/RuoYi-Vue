@@ -2,7 +2,9 @@ package com.ruoyi.manage.service.impl;
 
 import java.util.List;
 import com.ruoyi.common.utils.DateUtils;
+import com.ruoyi.manage.domain.Book;
 import com.ruoyi.manage.domain.vo.BookIssueVo;
+import com.ruoyi.manage.service.IBookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.manage.mapper.BookIssueMapper;
@@ -20,6 +22,9 @@ public class BookIssueServiceImpl implements IBookIssueService
 {
     @Autowired
     private BookIssueMapper bookIssueMapper;
+
+    @Autowired
+    private IBookService bookService;       //  声明注入IBoookService
 
     /**
      * 查询用户借阅
@@ -42,8 +47,28 @@ public class BookIssueServiceImpl implements IBookIssueService
     @Override
     public List<BookIssueVo> selectBookIssueList(BookIssue bookIssue)   // 返回Vo
     {
-        return bookIssueMapper.selectBookIssueList(bookIssue);
+        // 调用Mapper查询数据
+        List<BookIssueVo> list = bookIssueMapper.selectBookIssueList(bookIssue);
+
+        // 转换status为描述文字
+        for (BookIssueVo bookIssueVo : list) {
+            if (bookIssueVo.getStatus() != null) {
+                switch (bookIssueVo.getStatus()) {
+                    case 0:
+                        bookIssueVo.setStatusName("未归还");
+                        break;
+                    case 1:
+                        bookIssueVo.setStatusName("已归还");
+                        break;
+                    default:
+                        bookIssueVo.setStatusName("请联系管理员");
+                }
+            }
+        }
+        return list;
     }
+
+
 
     /**
      * 新增用户借阅
@@ -67,7 +92,20 @@ public class BookIssueServiceImpl implements IBookIssueService
     @Override
     public int updateBookIssue(BookIssue bookIssue)
     {
-        bookIssue.setUpdateTime(DateUtils.getNowDate());
+        /*bookIssue.setUpdateTime(DateUtils.getNowDate());*/
+        // 如果归还日期不为空，状态设为“已归还”（1）
+        BookIssue existingIssue = selectBookIssueById(bookIssue.getId());
+        if (bookIssue.getReturnDate() != null) {
+            bookIssue.setStatus(1);
+            // 如果之前未归还，现在归还，增加库存
+            if (existingIssue.getReturnDate() == null) {
+                Book book = bookService.selectBookById(bookIssue.getBookId());
+                book.setQuantity(book.getQuantity() + 1);
+                bookService.updateBook(book);
+            }
+        } else {
+            bookIssue.setStatus(0); // 如果归还日期为空，状态设为“已借出”（0）
+        }
         return bookIssueMapper.updateBookIssue(bookIssue);
     }
 

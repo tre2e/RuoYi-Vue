@@ -42,6 +42,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             bi.due_date,
             bi.return_date,
             bi.status,
+            <!--CASE bi.status
+                WHEN 0 THEN '未归还'
+                WHEN 1 THEN '已归还'
+                ELSE '未知'
+            END AS status_name,  &lt;!&ndash; 添加 status_name 映射 &ndash;&gt;-->
             bi.remark
         FROM
             book_issue bi

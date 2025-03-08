@@ -1,5 +1,6 @@
 package com.ruoyi.manage.controller;
 
+import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
@@ -100,7 +101,7 @@ public class BookIssueController extends BaseController
         if (book == null || book.getQuantity() <= 0) {
             return AjaxResult.error("库存不足");
         }
-        book.setQuantity(book.getQuantity() - 1);
+        book.setQuantity(book.getQuantity() - 1);               // 借出一本书
         bookService.updateBook(book);
         int result = bookIssueService.insertBookIssue(bookIssue);
         return toAjax(result);
@@ -130,6 +131,7 @@ public class BookIssueController extends BaseController
             return AjaxResult.error("借阅记录无效或已归还");
         }
         issue.setStatus(1);
+        issue.setReturnDate(new Date());        // 设置归还日期为当前时间
         bookIssueService.updateBookIssue(issue);
         Book book = bookService.selectBookById(issue.getBookId());
         book.setQuantity(book.getQuantity() + 1);
