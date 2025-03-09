@@ -75,7 +75,7 @@ public class BookIssueController extends BaseController
     /**
      * 查询逾期未归还的借阅列表
      */
-    @PreAuthorize("@ss.hasPermi('manage:issue:overdue')")
+    @PreAuthorize("@ss.hasPermi('manage:issue:list')")
     @GetMapping("/overdue")
     public TableDataInfo overdueList() {
         startPage();
