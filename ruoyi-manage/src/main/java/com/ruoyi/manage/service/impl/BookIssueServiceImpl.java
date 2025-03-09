@@ -132,4 +132,12 @@ public class BookIssueServiceImpl implements IBookIssueService
     {
         return bookIssueMapper.deleteBookIssueById(id);
     }
+    /**
+     * 处理逾期用户信息
+     *
+     * */
+    @Override
+    public List<BookIssueVo> selectOverdueBookIssueList() {
+        return bookIssueMapper.selectOverdueBookIssueList();
+    }
 }

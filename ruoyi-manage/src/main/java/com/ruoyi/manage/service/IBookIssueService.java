@@ -59,4 +59,7 @@ public interface IBookIssueService
      * @return 结果
      */
     public int deleteBookIssueById(Long id);
+
+    // 新增逾期查询方法
+    List<BookIssueVo> selectOverdueBookIssueList();
 }

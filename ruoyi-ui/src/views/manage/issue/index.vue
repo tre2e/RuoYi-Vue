@@ -183,34 +183,39 @@
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="用户ID" prop="userId">
-          <el-input v-model="form.userId" placeholder="请输入用户ID" />
+          <el-input v-model="form.userId" placeholder="请输入用户ID" disabled/>
         </el-form-item>
         <el-form-item label="书籍ID" prop="bookId">
-          <el-input v-model="form.bookId" placeholder="请输入书籍ID" />
+          <el-input v-model="form.bookId" placeholder="请输入书籍ID" disabled/>
         </el-form-item>
         <el-form-item label="借阅日期" prop="issueDate">
-          <el-date-picker clearable
+          <el-date-picker
             v-model="form.issueDate"
             type="date"
             value-format="yyyy-MM-dd"
-            placeholder="请选择借阅日期">
-          </el-date-picker>
+            placeholder="请选择借阅日期"
+            :picker-options="issueDatePickerOptions"
+            disabled
+          />
         </el-form-item>
         <el-form-item label="应还日期" prop="dueDate">
-          <el-date-picker clearable
+          <el-date-picker
             v-model="form.dueDate"
             type="date"
             value-format="yyyy-MM-dd"
-            placeholder="请选择应还日期">
-          </el-date-picker>
+            placeholder="请选择应还日期"
+            :picker-options="dueDatePickerOptions"
+            :disabled="form.status === 1"
+          />
         </el-form-item>
         <el-form-item label="归还日期" prop="returnDate">
-          <el-date-picker clearable
+          <el-date-picker
             v-model="form.returnDate"
             type="date"
             value-format="yyyy-MM-dd"
-            placeholder="请选择归还日期">
-          </el-date-picker>
+            placeholder="请选择归还日期"
+            :disabled="form.status === 0 || form.status === 1"
+          />
         </el-form-item>
         <el-form-item label="备注" prop="remark">
           <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
@@ -231,6 +236,8 @@ import request from '@/utils/request'; // 确保导入 request
 export default {
   name: "Issue",
   data() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // 设置为当天0点
     return {
       // 遮罩层
       loading: true,
@@ -264,7 +271,9 @@ export default {
         status: null,
       },
       // 表单参数
-      form: {},
+      form: {
+        issueDate: this.formatDate(today) // 默认当前日期
+      },
       // 表单校验
       rules: {
         userId: [
@@ -282,6 +291,26 @@ export default {
         status: [
           { required: true, message: "状态不能为空", trigger: "change" }
         ],
+      },
+      // 借阅日期限制：从当天开始
+      issueDatePickerOptions: {
+        /*disabledDate(time) {
+          return time.getTime() < today.getTime();
+        }*/
+        disabledDate(time) {
+          return true; // 完全禁用选择
+        }
+      },
+      // 应还日期限制：基于issueDate，最长2个月
+      dueDatePickerOptions: {
+        disabledDate: (time) => {
+          const issueDate = this.form.issueDate ? new Date(this.form.issueDate) : today;
+          const minDueDate = new Date(issueDate);
+          minDueDate.setDate(minDueDate.getDate() + 1);
+          const maxDueDate = new Date(issueDate);
+          maxDueDate.setMonth(maxDueDate.getMonth() + 2);
+          return time.getTime() < minDueDate.getTime() || time.getTime() > maxDueDate.getTime();
+        }
       }
     };
   },
@@ -309,7 +338,7 @@ export default {
         id: null,
         userId: null,
         bookId: null,
-        issueDate: null,
+        issueDate: this.formatDate(new Date()), // 重置时填入当前日期
         dueDate: null,
         returnDate: null,
         status: null,
@@ -462,6 +491,22 @@ export default {
       this.download('manage/issue/export', {
         ...this.queryParams
       }, `issue_${new Date().getTime()}.xlsx`)
+    },
+    parseTime(time, format) {
+      if (!time) return '';
+      const date = new Date(time);
+      const map = {
+        '{y}': date.getFullYear(),
+        '{m}': String(date.getMonth() + 1).padStart(2, '0'),
+        '{d}': String(date.getDate()).padStart(2, '0')
+      };
+      return format.replace(/{y}|{m}|{d}/g, match => map[match]);
+    },
+    formatDate(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
     }
   }
 };

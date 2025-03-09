@@ -18,6 +18,15 @@ export function listMyIssues(query) {
   })
 }
 
+// 查询逾期未归还列表
+export function listOverdue(query) {
+  return request({
+    url: '/manage/issue/overdue',
+    method: 'get',
+    params: query
+  });
+}
+
 // 查询用户借阅详细
 export function getIssue(id) {
   return request({

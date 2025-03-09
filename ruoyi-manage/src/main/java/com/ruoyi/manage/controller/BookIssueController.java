@@ -1,5 +1,6 @@
 package com.ruoyi.manage.controller;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
@@ -72,6 +73,17 @@ public class BookIssueController extends BaseController
     }
 
     /**
+     * 查询逾期未归还的借阅列表
+     */
+    @PreAuthorize("@ss.hasPermi('manage:issue:overdue')")
+    @GetMapping("/overdue")
+    public TableDataInfo overdueList() {
+        startPage();
+        List<BookIssueVo> list = bookIssueService.selectOverdueBookIssueList();
+        return getDataTable(list);
+    }
+
+    /**
      * 导出用户借阅列表
      */
     @PreAuthorize("@ss.hasPermi('manage:issue:export')")
@@ -113,6 +125,35 @@ public class BookIssueController extends BaseController
     @PostMapping("/addWithQuantity")
     @Transactional
     public AjaxResult addWithQuantity(@RequestBody BookIssue bookIssue) {
+
+        // 获取当前0点时间、日期
+        Date today = new Date();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(today);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        Date todayStart = calendar.getTime();
+        Date todayEnd = new Date(todayStart.getTime() + 86399999); // 当天23:59:59
+
+        // 校验借阅日期
+        if (bookIssue.getIssueDate() == null || bookIssue.getIssueDate().before(todayStart)) {
+            return AjaxResult.error("借阅日期必须从当天开始");
+        }
+
+        // 校验应还日期（最长2个月）
+        if (bookIssue.getDueDate() == null) {
+            return AjaxResult.error("应还日期不能为空");
+        }
+        calendar.setTime(bookIssue.getIssueDate());
+        calendar.add(Calendar.MONTH, 2); // 加上2个月
+        Date maxDueDate = calendar.getTime();
+        if (bookIssue.getDueDate().before(bookIssue.getIssueDate()) || bookIssue.getDueDate().after(maxDueDate)) {
+            return AjaxResult.error("应还日期必须在借阅日期之后且不超过2个月");
+        }
+
+
         Book book = bookService.selectBookById(bookIssue.getBookId());
         if (book == null || book.getQuantity() <= 0) {
             return AjaxResult.error("库存不足");

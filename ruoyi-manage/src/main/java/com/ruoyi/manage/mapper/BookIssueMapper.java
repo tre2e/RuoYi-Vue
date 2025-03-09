@@ -61,4 +61,7 @@ public interface BookIssueMapper
      * @return 结果
      */
     public int deleteBookIssueByIds(Long[] ids);
+
+    // 逾期书籍查询
+    public List<BookIssueVo> selectOverdueBookIssueList();
 }

@@ -67,7 +67,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <!--<select id="selectBookIssueList" parameterType="BookIssue" resultMap="BookIssueResult">
         <include refid="selectBookIssueVo"/>
-        <where>  
+        <where>
             <if test="userId != null "> and user_id = #{userId}</if>
             <if test="bookId != null "> and book_id = #{bookId}</if>
             <if test="issueDate != null "> and issue_date = #{issueDate}</if>
@@ -91,11 +91,37 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="status != null "> and bi.status = #{status}</if>
         </where>
     </select>
-    
+
     <!--<select id="selectBookIssueById" parameterType="Long" resultMap="BookIssueResult">
         <include refid="selectBookIssueVo"/>
         where id = #{id}
     </select>-->
+
+    <!-- 查询逾期未归还的借阅列表 -->
+    <select id="selectOverdueBookIssueList" resultMap="BookIssueVoResult">
+        SELECT
+            bi.id,
+            bi.user_id,
+            bi.book_id,
+            su.user_name,
+            mb.name,
+            bi.issue_date,
+            bi.due_date,
+            bi.return_date,
+            bi.status,
+            '已逾期' AS status_name,
+            bi.remark,
+            mb.cover
+        FROM
+            book_issue bi
+                LEFT JOIN sys_user su ON bi.user_id = su.user_id
+                LEFT JOIN mng_book mb ON bi.book_id = mb.id
+        WHERE
+        <![CDATA[
+            bi.due_date < CURRENT_DATE AND bi.status = 0
+        ]]>
+    </select>
+
     <!-- 查询单条借阅记录 -->
     <select id="selectBookIssueById" parameterType="Long" resultMap="BookIssueResult">
         SELECT
@@ -170,7 +196,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <!-- 批量删除借阅记录 -->
     <delete id="deleteBookIssueByIds" parameterType="String">
-        delete from book_issue where id in 
+        delete from book_issue where id in
         <foreach item="id" collection="array" open="(" separator="," close=")">
             #{id}
         </foreach>

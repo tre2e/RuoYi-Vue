@@ -133,6 +133,8 @@
             type="date"
             value-format="yyyy-MM-dd"
             placeholder="请选择借阅日期"
+            :picker-options="issueDatePickerOptions"
+            disabled
           />
         </el-form-item>
         <el-form-item label="应还日期" prop="dueDate">
@@ -141,8 +143,10 @@
             type="date"
             value-format="yyyy-MM-dd"
             placeholder="请选择应还日期"
+            :picker-options="dueDatePickerOptions"
           />
         </el-form-item>
+
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitBorrowForm">确 定</el-button>
@@ -155,13 +159,14 @@
 <script>
 import request from '@/utils/request' // 导入 request
 import { searchBook } from '@/api/manage/book' // 使用新接口
-/*import { addIssue } from '@/api/manage/issue'; // 借阅 API*/
 import { addIssueWithQuantity } from '@/api/manage/issue'; // 新增接口
 import { getUserProfile } from '@/api/system/user';  // 获取用户信息
 
 export default {
   name: 'BookCollectionSearch',
   data() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // 设置为当天0点
     return {
       loading: false,
       total: 0,
@@ -191,7 +196,7 @@ export default {
         userName: null, // 显示用
         bookId: null,
         bookName: null,     // 显示用
-        issueDate: null,
+        issueDate: this.formatDate(today), // 默认当前日期
         dueDate: null,
         status: 0 // 默认未归还
       },
@@ -200,6 +205,25 @@ export default {
         bookId: [{ required: true, message: "书籍ID不能为空", trigger: "blur" }],*/
         issueDate: [{ required: true, message: "借阅日期不能为空", trigger: "change" }],
         dueDate: [{ required: true, message: "应还日期不能为空", trigger: "change" }]
+      },
+
+      // 借阅日期限制：从当天开始
+      issueDatePickerOptions: {
+        disabledDate(time) {
+          return true; // 完全禁用选择
+        }
+      },
+      // 应还日期限制：基于issueDate，最长2个月
+      dueDatePickerOptions: {
+        disabledDate: (time) => {
+          // 使用 borrowForm.issueDate 或 today 作为基准
+          const issueDate = this.borrowForm.issueDate ? new Date(this.borrowForm.issueDate) : today;
+          const minDueDate = new Date(issueDate);
+          minDueDate.setDate(minDueDate.getDate() + 1); // 至少明天
+          const maxDueDate = new Date(issueDate);
+          maxDueDate.setMonth(maxDueDate.getMonth() + 2);
+          return time.getTime() < minDueDate.getTime() || time.getTime() > maxDueDate.getTime();
+        }
       }
     };   //添加分号
   },
@@ -323,7 +347,7 @@ export default {
         userName: this.borrowForm.userName, // 保留当前用户名
         bookId: null,
         bookName: null,
-        issueDate: null,
+        issueDate: this.formatDate(new Date()), // 始终保持当前日期
         dueDate: null,
         status: 0
       };
@@ -363,6 +387,22 @@ export default {
             });
         }
       });
+    },
+    parseTime(time, format) {
+      if (!time) return '';
+      const date = new Date(time);
+      const map = {
+        '{y}': date.getFullYear(),
+        '{m}': String(date.getMonth() + 1).padStart(2, '0'),
+        '{d}': String(date.getDate()).padStart(2, '0')
+      };
+      return format.replace(/{y}|{m}|{d}/g, match => map[match]);
+    },
+    formatDate(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
     }
   }
 };   //添加分号
