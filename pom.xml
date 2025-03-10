@@ -218,6 +218,13 @@
                 <version>${ruoyi.version}</version>
             </dependency>
 
+            <!-- 图书管理 -->
+            <dependency>
+                <groupId>com.ruoyi</groupId>
+                <artifactId>ruoyi-manage</artifactId>
+                <version>${ruoyi.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 

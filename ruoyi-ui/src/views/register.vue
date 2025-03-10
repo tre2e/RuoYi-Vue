@@ -29,6 +29,19 @@
           <svg-icon slot="prefix" icon-class="password" class="el-input__icon input-icon" />
         </el-input>
       </el-form-item>
+
+      <el-form-item prop="inviteCode">
+        <el-input
+          v-model="registerForm.inviteCode"
+          type="text"
+          auto-complete="off"
+          placeholder="邀请码"
+          @keyup.enter.native="handleRegister"
+        >
+          <svg-icon slot="prefix" icon-class="link" class="el-input__icon input-icon" />
+        </el-input>
+      </el-form-item>
+
       <el-form-item prop="code" v-if="captchaEnabled">
         <el-input
           v-model="registerForm.code"
@@ -85,6 +98,7 @@ export default {
         username: "",
         password: "",
         confirmPassword: "",
+        inviteCode: "", // 新增邀请码字段
         code: "",
         uuid: ""
       },
@@ -101,6 +115,9 @@ export default {
         confirmPassword: [
           { required: true, trigger: "blur", message: "请再次输入您的密码" },
           { required: true, validator: equalToPassword, trigger: "blur" }
+        ],
+        inviteCode: [
+          { required: true, trigger: "blur", message: "请输入邀请码" },
         ],
         code: [{ required: true, trigger: "change", message: "请输入验证码" }]
       },

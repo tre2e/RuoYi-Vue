@@ -41,6 +41,8 @@ public class SysRegisterService
     private SysUserRoleMapper userRoleMapper; // 新增注入
     /**
      * 注册
+     * @param registerBody 注册信息
+     * @return 空字符串（成功），错误信息（失败）
      */
     public String register(RegisterBody registerBody)
     {
@@ -97,7 +99,11 @@ public class SysRegisterService
                 userRole.setRoleId(defaultRoleId);
                 userRoleMapper.insertUserRole(userRole);
 
+                // 将新用户ID存储到registerBody
+                registerBody.setUserId(sysUser.getUserId());
+
                 AsyncManager.me().execute(AsyncFactory.recordLogininfor(username, Constants.REGISTER, MessageUtils.message("user.register.success")));
+
             }
         }
         return msg;
