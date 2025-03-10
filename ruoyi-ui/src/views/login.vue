@@ -56,7 +56,7 @@
     </el-form>
     <!--  底部  -->
     <div class="el-login-footer">
-      <span>Copyright © 2018-2025 ruoyi.vip All Rights Reserved.</span>
+      <span>&copy; {{ new Date().getFullYear() }} 上理信息安全图书角 | 版本 {{ version }}</span>
     </div>
   </div>
 </template>
