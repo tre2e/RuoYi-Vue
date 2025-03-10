@@ -155,7 +155,7 @@ export default {
 };
 </script>
 
-<style rel="stylesheet/scss" lang="scss">
+<!--<style rel="stylesheet/scss" lang="scss">
 .login {
   display: flex;
   justify-content: center;
@@ -215,5 +215,115 @@ export default {
 }
 .login-code-img {
   height: 38px;
+}
+</style>-->
+<style rel="stylesheet/scss" lang="scss">
+.login {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-image: url("../assets/images/login-background.jpg");
+  background-size: cover;
+  background-position: center;
+}
+
+.title {
+  margin: 0 auto 40px auto;
+  text-align: center;
+  color: #2b82d1; // Darker blue for title
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: 2px;
+}
+
+.login-form {
+  border-radius: 8px;
+  background: #f0f7ff; // Light blue background
+  width: 420px;
+  padding: 35px 35px 15px 35px;
+  box-shadow: 0 4px 12px rgba(43, 130, 209, 0.15); // Light blue shadow
+  .el-input {
+    height: 42px;
+    .el-input__inner {
+      height: 42px;
+      border-radius: 4px;
+      border: 1px solid #b3d8ff; // Light blue border
+      background: #fff;
+      transition: all 0.3s;
+      &:focus {
+        border-color: #66b1ff; // Medium blue on focus
+        box-shadow: 0 0 5px rgba(102, 177, 255, 0.5); // Light blue glow
+      }
+    }
+  }
+  .input-icon {
+    height: 42px;
+    width: 16px;
+    margin-left: 2px;
+    color: #66b1ff; // Medium blue icons
+  }
+  .el-button {
+    border-radius: 4px;
+    font-size: 16px;
+    padding: 12px 20px;
+    background: #66b1ff; // Medium blue button
+    border-color: #66b1ff;
+    transition: all 0.3s;
+    &:hover {
+      background: #85c1ff; // Lighter blue on hover
+      border-color: #85c1ff;
+    }
+  }
+}
+
+.login-code {
+  width: 33%;
+  height: 42px;
+  float: right;
+  img {
+    cursor: pointer;
+    vertical-align: middle;
+    border-radius: 4px;
+    height: 42px;
+    width: 100%;
+    border: 1px solid #b3d8ff; // Light blue border
+    transition: all 0.3s;
+    &:hover {
+      border-color: #66b1ff; // Medium blue on hover
+    }
+  }
+}
+
+.el-checkbox {
+  color: #2b82d1; // Darker blue for checkbox text
+  margin-bottom: 20px;
+}
+
+.el-login-footer {
+  height: 50px;
+  line-height: 50px;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  text-align: center;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 13px;
+  letter-spacing: 1.2px;
+  span {
+    background: rgba(43, 130, 209, 0.5); // Semi-transparent blue
+    padding: 6px 15px;
+    border-radius: 15px;
+    color: #ffffff;
+    display: inline-block;
+    transition: all 0.3s;
+    &:hover {
+      background: rgba(43, 130, 209, 0.7); // Darker blue on hover
+    }
+  }
+}
+
+.login-code-img {
+  height: 42px;
 }
 </style>
