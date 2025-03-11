@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.manage.mapper.BookMapper">
+    
+    <resultMap type="Book" id="BookResult">
+        <result property="id"    column="id"    />
+        <result property="name"    column="name"    />
+        <result property="cover"    column="cover"    />
+        <result property="author"    column="author"    />
+        <result property="publisher"    column="publisher"    />
+        <result property="isbn"    column="isbn"    />
+        <result property="publishDate"    column="publish_date"    />
+        <result property="categoryId"    column="category_id"    />
+        <result property="regionId"    column="region_id"    />
+        <result property="quantity"    column="quantity"    />
+        <result property="status"    column="status"    />
+        <result property="entryDate"    column="entry_date"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <!--<sql id="selectBookVo">
+        select id, name, cover, author, publisher, isbn, publish_date, category_id, region_id, quantity, status, entry_date, create_time, update_time, create_by, remark from mng_book
+    </sql>-->
+
+    <sql id="selectBookVo">
+        SELECT
+            b.id, b.name, b.cover, b.author, b.publisher, b.isbn,
+            b.publish_date, b.category_id, b.region_id, b.quantity,
+            b.status, b.entry_date, b.create_time, b.update_time,
+            b.create_by, b.remark,
+            c.name AS categoryName,
+            r.name AS regionName
+        FROM mng_book b
+                 LEFT JOIN book_category c ON b.category_id = c.id
+                 LEFT JOIN book_region r ON b.region_id = r.id
+    </sql>
+
+    <!--<select id="selectBookList" parameterType="Book" resultMap="BookResult">
+        <include refid="selectBookVo"/>
+        <where>  
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="cover != null  and cover != ''"> and cover = #{cover}</if>
+            <if test="author != null  and author != ''"> and author = #{author}</if>
+            <if test="publisher != null  and publisher != ''"> and publisher = #{publisher}</if>
+            <if test="isbn != null  and isbn != ''"> and isbn = #{isbn}</if>
+            <if test="publishDate != null "> and publish_date = #{publishDate}</if>
+            <if test="categoryId != null "> and category_id = #{categoryId}</if>
+            <if test="regionId != null "> and region_id = #{regionId}</if>
+            <if test="quantity != null "> and quantity = #{quantity}</if>
+            <if test="status != null "> and status = #{status}</if>
+            <if test="entryDate != null "> and entry_date = #{entryDate}</if>
+        </where>
+    </select>-->
+
+    <select id="selectBookList" parameterType="Book" resultMap="BookResult">
+        <include refid="selectBookVo"/>
+        <where>
+            <if test="name != null  and name != ''"> and b.name like concat('%', #{name}, '%')</if>
+            <if test="cover != null  and cover != ''"> and b.cover = #{cover}</if>
+            <if test="author != null  and author != ''"> and b.author = #{author}</if>
+            <if test="publisher != null  and publisher != ''"> and b.publisher = #{publisher}</if>
+            <if test="isbn != null  and isbn != ''"> and b.isbn = #{isbn}</if>
+            <if test="publishDate != null "> and b.publish_date = #{publishDate}</if>
+            <if test="categoryId != null "> and b.category_id = #{categoryId}</if>
+            <if test="regionId != null "> and b.region_id = #{regionId}</if>
+            <if test="quantity != null "> and b.quantity = #{quantity}</if>
+            <if test="status != null "> and b.status = #{status}</if>
+            <if test="entryDate != null "> and b.entry_date = #{entryDate}</if>
+        </where>
+    </select>
+    
+    <select id="selectBookById" parameterType="Long" resultMap="BookResult">
+        <include refid="selectBookVo"/>
+        where b.id = #{id}
+    </select>
+
+    <insert id="insertBook" parameterType="Book" useGeneratedKeys="true" keyProperty="id">
+        insert into mng_book
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null and name != ''">name,</if>
+            <if test="cover != null">cover,</if>
+            <if test="author != null and author != ''">author,</if>
+            <if test="publisher != null and publisher != ''">publisher,</if>
+            <if test="isbn != null and isbn != ''">isbn,</if>
+            <if test="publishDate != null">publish_date,</if>
+            <if test="categoryId != null">category_id,</if>
+            <if test="regionId != null">region_id,</if>
+            <if test="quantity != null">quantity,</if>
+            <if test="status != null">status,</if>
+            <if test="entryDate != null">entry_date,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="cover != null">#{cover},</if>
+            <if test="author != null and author != ''">#{author},</if>
+            <if test="publisher != null and publisher != ''">#{publisher},</if>
+            <if test="isbn != null and isbn != ''">#{isbn},</if>
+            <if test="publishDate != null">#{publishDate},</if>
+            <if test="categoryId != null">#{categoryId},</if>
+            <if test="regionId != null">#{regionId},</if>
+            <if test="quantity != null">#{quantity},</if>
+            <if test="status != null">#{status},</if>
+            <if test="entryDate != null">#{entryDate},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateBook" parameterType="Book">
+        update mng_book
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="cover != null">cover = #{cover},</if>
+            <if test="author != null and author != ''">author = #{author},</if>
+            <if test="publisher != null and publisher != ''">publisher = #{publisher},</if>
+            <if test="isbn != null and isbn != ''">isbn = #{isbn},</if>
+            <if test="publishDate != null">publish_date = #{publishDate},</if>
+            <if test="categoryId != null">category_id = #{categoryId},</if>
+            <if test="regionId != null">region_id = #{regionId},</if>
+            <if test="quantity != null">quantity = #{quantity},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="entryDate != null">entry_date = #{entryDate},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteBookById" parameterType="Long">
+        delete from mng_book where id = #{id}
+    </delete>
+
+    <delete id="deleteBookByIds" parameterType="String">
+        delete from mng_book where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

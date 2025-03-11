@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.manage.mapper.SysInviteCodeMapper">
+    
+    <resultMap type="SysInviteCode" id="SysInviteCodeResult">
+        <result property="id"    column="id"    />
+        <result property="inviteCode"    column="invite_code"    />
+        <result property="isUsed"    column="is_used"    />
+        <result property="usedBy"    column="used_by"    />
+        <result property="usedTime"    column="used_time"    />
+        <result property="expireTime"    column="expire_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="userName"    column="user_name"    />
+    </resultMap>
+
+    <sql id="selectSysInviteCodeVo">
+        select ic.id, ic.invite_code, ic.is_used, ic.used_by, ic.used_time, ic.expire_time, ic.create_by, ic.create_time, ic.update_time, ic.remark, su.user_name
+        from sys_invite_code ic
+                 left join sys_user su on ic.used_by = su.user_id
+    </sql>
+
+    <!-- 查询邀请码列表 -->
+    <select id="selectSysInviteCodeList" parameterType="SysInviteCode" resultMap="SysInviteCodeResult">
+        <include refid="selectSysInviteCodeVo"/>
+        <where>
+            <if test="inviteCode != null and inviteCode != ''"> and ic.invite_code = #{inviteCode}</if>
+            <if test="isUsed != null "> and ic.is_used = #{isUsed}</if>
+            <if test="usedBy != null "> and ic.used_by = #{usedBy}</if>
+            <if test="usedTime != null "> and ic.used_time = #{usedTime}</if>
+            <if test="expireTime != null "> and ic.expire_time = #{expireTime}</if>
+        </where>
+    </select>
+
+    <!-- 根据 ID 查询邀请码 -->
+    <select id="selectSysInviteCodeById" parameterType="Long" resultMap="SysInviteCodeResult">
+        <include refid="selectSysInviteCodeVo"/>
+        where ic.id = #{id}
+    </select>
+
+    <!-- 根据 invite_code 查询邀请码 -->
+    <select id="selectSysInviteCodeByCode" parameterType="String" resultMap="SysInviteCodeResult">
+        <include refid="selectSysInviteCodeVo"/>
+        WHERE ic.invite_code = #{inviteCode}
+    </select>
+
+    <!-- 插入邀请码 -->
+    <insert id="insertSysInviteCode" parameterType="SysInviteCode" useGeneratedKeys="true" keyProperty="id">
+        insert into sys_invite_code
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="inviteCode != null and inviteCode != ''">invite_code,</if>
+            <if test="isUsed != null">is_used,</if>
+            <if test="usedBy != null">used_by,</if>
+            <if test="usedTime != null">used_time,</if>
+            <if test="expireTime != null">expire_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="inviteCode != null and inviteCode != ''">#{inviteCode},</if>
+            <if test="isUsed != null">#{isUsed},</if>
+            <if test="usedBy != null">#{usedBy},</if>
+            <if test="usedTime != null">#{usedTime},</if>
+            <if test="expireTime != null">#{expireTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <!-- 更新邀请码 -->
+    <update id="updateSysInviteCode" parameterType="SysInviteCode">
+        update sys_invite_code
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="inviteCode != null and inviteCode != ''">invite_code = #{inviteCode},</if>
+            <if test="isUsed != null">is_used = #{isUsed},</if>
+            <if test="usedBy != null">used_by = #{usedBy},</if>
+            <if test="usedTime != null">used_time = #{usedTime},</if>
+            <if test="expireTime != null">expire_time = #{expireTime},</if>
+            <if test="expireTime == null">expire_time = NULL,</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <!-- 删除邀请码（单个） -->
+    <delete id="deleteSysInviteCodeById" parameterType="Long">
+        delete from sys_invite_code where id = #{id}
+    </delete>
+
+    <!-- 删除邀请码（批量） -->
+    <delete id="deleteSysInviteCodeByIds" parameterType="String">
+        delete from sys_invite_code where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

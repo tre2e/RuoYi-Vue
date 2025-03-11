@@ -1,5 +1,7 @@
 package com.ruoyi.framework.web.service;
 
+import com.ruoyi.system.domain.SysUserRole; // 新增导入
+import com.ruoyi.system.mapper.SysUserRoleMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import com.ruoyi.common.constant.CacheConstants;
@@ -35,8 +37,12 @@ public class SysRegisterService
     @Autowired
     private RedisCache redisCache;
 
+    @Autowired
+    private SysUserRoleMapper userRoleMapper; // 新增注入
     /**
      * 注册
+     * @param registerBody 注册信息
+     * @return 空字符串（成功），错误信息（失败）
      */
     public String register(RegisterBody registerBody)
     {
@@ -77,6 +83,8 @@ public class SysRegisterService
         {
             sysUser.setNickName(username);
             sysUser.setPassword(SecurityUtils.encryptPassword(password));
+            /* test */
+
             boolean regFlag = userService.registerUser(sysUser);
             if (!regFlag)
             {
@@ -84,7 +92,18 @@ public class SysRegisterService
             }
             else
             {
+                // 为用户分配普通用户角色（假设 roleId = 2 为普通用户角色）
+                Long defaultRoleId = 2L; // 根据你的数据库调整
+                SysUserRole userRole = new SysUserRole();
+                userRole.setUserId(sysUser.getUserId()); // 新用户的ID
+                userRole.setRoleId(defaultRoleId);
+                userRoleMapper.insertUserRole(userRole);
+
+                // 将新用户ID存储到registerBody
+                registerBody.setUserId(sysUser.getUserId());
+
                 AsyncManager.me().execute(AsyncFactory.recordLogininfor(username, Constants.REGISTER, MessageUtils.message("user.register.success")));
+
             }
         }
         return msg;

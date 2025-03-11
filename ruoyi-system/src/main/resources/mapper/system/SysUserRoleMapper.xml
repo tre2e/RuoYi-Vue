@@ -41,4 +41,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
  	        #{userId}
             </foreach> 
 	</delete>
+
+	<!-- 新增单个用户-角色关联 -->
+	<insert id="insertUserRole" parameterType="com.ruoyi.system.domain.SysUserRole">
+		INSERT INTO sys_user_role (user_id, role_id)
+		VALUES (#{userId}, #{roleId})
+	</insert>
 </mapper> 

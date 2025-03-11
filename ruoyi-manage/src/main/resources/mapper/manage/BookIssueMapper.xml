@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.manage.mapper.BookIssueMapper">
+
+    <!-- BookIssue 实体映射 -->
+    <resultMap type="BookIssue" id="BookIssueResult">
+        <result property="id"    column="id"    />
+        <result property="userId"    column="user_id"    />
+        <result property="bookId"    column="book_id"    />
+        <result property="issueDate"    column="issue_date"    />
+        <result property="dueDate"    column="due_date"    />
+        <result property="returnDate"    column="return_date"    />
+        <result property="status"    column="status"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <!-- 新增 BookIssueVo ResultMap -->
+    <resultMap type="com.ruoyi.manage.domain.vo.BookIssueVo" id="BookIssueVoResult">
+        <result property="id" column="id" />
+        <result property="userId" column="user_id" /> <!-- 添加 userId -->
+        <result property="bookId" column="book_id" /> <!-- 添加 bookId -->
+        <result property="userName" column="user_name" />
+        <result property="bookName" column="name" />
+        <result property="issueDate" column="issue_date" />
+        <result property="dueDate" column="due_date" />
+        <result property="returnDate" column="return_date" />
+        <result property="status" column="status" />
+        <result property="statusName" column="status_name" /> <!-- 映射 statusName -->
+        <result property="remark" column="remark" />
+        <result property="cover" column="cover" /> <!-- 新增封面映射 -->
+    </resultMap>
+    <!-- 添加sql查询  -->
+    <sql id="selectBookIssueVo">
+        SELECT
+            bi.id,
+            bi.user_id,      <!-- 添加 user_id -->
+            bi.book_id,      <!-- 添加 book_id -->
+            su.user_name,
+            mb.name,
+            bi.issue_date,
+            bi.due_date,
+            bi.return_date,
+            bi.status,
+            CASE bi.status
+                WHEN 0 THEN '未归还'
+                WHEN 1 THEN '已归还'
+                ELSE '请联系管理员'
+            END AS status_name,  <!-- 添加 status_name 映射 -->
+            bi.remark,
+            mb.cover
+        FROM
+            book_issue bi
+                LEFT JOIN
+            sys_user su ON bi.user_id = su.user_id
+                LEFT JOIN
+            mng_book mb ON bi.book_id = mb.id
+    </sql>
+
+    <!--<sql id="selectBookIssueVo">
+        select id, user_id, book_id, issue_date, due_date, return_date, status, create_time, update_time, create_by, remark from book_issue
+    </sql>-->
+
+    <!--<select id="selectBookIssueList" parameterType="BookIssue" resultMap="BookIssueResult">
+        <include refid="selectBookIssueVo"/>
+        <where>
+            <if test="userId != null "> and user_id = #{userId}</if>
+            <if test="bookId != null "> and book_id = #{bookId}</if>
+            <if test="issueDate != null "> and issue_date = #{issueDate}</if>
+            <if test="dueDate != null "> and due_date = #{dueDate}</if>
+            <if test="returnDate != null "> and return_date = #{returnDate}</if>
+            <if test="status != null "> and status = #{status}</if>
+        </where>
+    </select>-->
+
+    <!-- 查询借阅列表 -->
+    <select id="selectBookIssueList" parameterType="BookIssue" resultMap="BookIssueVoResult">
+        <include refid="selectBookIssueVo"/>
+        <where>
+            <if test="userId != null "> and bi.user_id = #{userId}</if>
+            <if test="bookId != null "> and bi.book_id = #{bookId}</if>
+            <if test="userName != null and userName != ''"> AND su.user_name = #{userName}</if> <!-- 改为精确查询 -->
+            <if test="bookName != null and bookName != ''"> AND mb.name LIKE concat('%', #{bookName}, '%')</if>
+            <if test="issueDate != null "> and bi.issue_date = #{issueDate}</if>
+            <if test="dueDate != null "> and bi.due_date = #{dueDate}</if>
+            <if test="returnDate != null "> and bi.return_date = #{returnDate}</if>
+            <if test="status != null "> and bi.status = #{status}</if>
+        </where>
+    </select>
+
+    <!--<select id="selectBookIssueById" parameterType="Long" resultMap="BookIssueResult">
+        <include refid="selectBookIssueVo"/>
+        where id = #{id}
+    </select>-->
+
+    <!-- 查询逾期未归还的借阅列表 -->
+    <select id="selectOverdueBookIssueList" resultMap="BookIssueVoResult">
+        SELECT
+            bi.id,
+            bi.user_id,
+            bi.book_id,
+            su.user_name,
+            mb.name,
+            bi.issue_date,
+            bi.due_date,
+            bi.return_date,
+            bi.status,
+            '已逾期' AS status_name,
+            bi.remark,
+            mb.cover
+        FROM
+            book_issue bi
+                LEFT JOIN sys_user su ON bi.user_id = su.user_id
+                LEFT JOIN mng_book mb ON bi.book_id = mb.id
+        WHERE
+        <![CDATA[
+            bi.due_date < CURRENT_DATE AND bi.status = 0
+        ]]>
+    </select>
+
+    <!-- 查询单条借阅记录 -->
+    <select id="selectBookIssueById" parameterType="Long" resultMap="BookIssueResult">
+        SELECT
+            id,
+            user_id,
+            book_id,
+            issue_date,
+            due_date,
+            return_date,
+            status,
+            create_time,
+            update_time,
+            create_by,
+            remark
+        FROM
+            book_issue
+        WHERE
+            id = #{id}
+    </select>
+
+    <!-- 新增借阅记录 -->
+    <insert id="insertBookIssue" parameterType="BookIssue" useGeneratedKeys="true" keyProperty="id">
+        insert into book_issue
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">user_id,</if>
+            <if test="bookId != null">book_id,</if>
+            <if test="issueDate != null">issue_date,</if>
+            <if test="dueDate != null">due_date,</if>
+            <if test="returnDate != null">return_date,</if>
+            <if test="status != null">status,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null">#{userId},</if>
+            <if test="bookId != null">#{bookId},</if>
+            <if test="issueDate != null">#{issueDate},</if>
+            <if test="dueDate != null">#{dueDate},</if>
+            <if test="returnDate != null">#{returnDate},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <!-- 更新借阅记录 -->
+    <update id="updateBookIssue" parameterType="BookIssue">
+        update book_issue
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="bookId != null">book_id = #{bookId},</if>
+            <if test="issueDate != null">issue_date = #{issueDate},</if>
+            <if test="dueDate != null">due_date = #{dueDate},</if>
+            <if test="returnDate != null">return_date = #{returnDate},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <!-- 删除单条借阅记录 -->
+    <delete id="deleteBookIssueById" parameterType="Long">
+        delete from book_issue where id = #{id}
+    </delete>
+
+    <!-- 批量删除借阅记录 -->
+    <delete id="deleteBookIssueByIds" parameterType="String">
+        delete from book_issue where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

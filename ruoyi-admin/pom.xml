@@ -61,6 +61,19 @@
             <artifactId>ruoyi-generator</artifactId>
         </dependency>
 
+        <!-- 图书管理 -->
+        <dependency>
+            <groupId>com.ruoyi</groupId>
+            <artifactId>ruoyi-manage</artifactId>
+            <version>3.8.9</version>
+        </dependency>
+
+        <!-- 用户服务依赖 -->
+        <dependency>
+            <groupId>com.ruoyi</groupId>
+            <artifactId>ruoyi-system</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>

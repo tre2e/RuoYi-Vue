@@ -49,7 +49,7 @@ export const constantRoutes = [
   {
     path: '/register',
     component: () => import('@/views/register'),
-    hidden: true
+    hidden: false
   },
   {
     path: '/404',
@@ -87,7 +87,30 @@ export const constantRoutes = [
         meta: { title: '个人中心', icon: 'user' }
       }
     ]
-  }
+  }/*,
+  // 在已有的路由配置中添加                  独立的检索页面，有机会再完成
+  {
+    path: '/resource',
+    component: Layout,
+    redirect: 'noRedirect',
+    alwaysShow: true,
+    name: 'ResourceManage',
+    meta: {
+      title: '资源管理',
+      icon: 'search'
+    },
+    children: [
+      {
+        path: 'search',
+        component: () => import('@/views/resource/menusearch'),
+        name: 'MenuSearch',
+        meta: {
+          title: '资源检索',
+          icon: 'search'
+        }
+      }
+    ]
+  }*/
 ]
 
 // 动态路由，基于用户权限动态去加载
